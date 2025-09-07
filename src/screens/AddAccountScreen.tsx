@@ -49,7 +49,7 @@ export default function AddAccountScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView className="flex-1 bg-[#0A0E14]">
+    <ScrollView className=" bg-primary1">
       <View className="p-6">
         <Text className="text-2xl font-bold text-white mb-6">
           ➕ Adicionar Conta

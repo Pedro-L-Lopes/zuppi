@@ -30,7 +30,7 @@ export default function AccountItem({ account, onDelete }: Props) {
   const isReceita = account.type === "receita";
 
   return (
-    <View className="bg-[#0D1117] border border-[#1f2937] rounded-2xl p-4 mb-4 shadow-md">
+    <View className="bg-dark2 border border-[#1f2937] rounded-2xl p-4 mb-4 shadow-md">
       {/* Cabeçalho */}
       <View className="flex-row justify-between items-center mb-2">
         <Text className="text-lg font-bold text-white">{account.name}</Text>
@@ -48,11 +48,12 @@ export default function AccountItem({ account, onDelete }: Props) {
           isReceita ? "text-[#00D26A]" : "text-[#1DA1F2]"
         }`}
       >
-        {isReceita ? "+ " : "- "}R$ {account.value.toFixed(2)}
+        R$ {account.value.toFixed(2)}
       </Text>
 
       {/* Badges */}
       <View className="flex-row flex-wrap gap-2 mb-2">
+        {/* Status */}
         <View
           className={`px-3 py-1 rounded-full ${
             account.status === "pago" ? "bg-[#003B2A]" : "bg-[#3B2A00]"
@@ -67,35 +68,55 @@ export default function AccountItem({ account, onDelete }: Props) {
           </Text>
         </View>
 
-        {account.dueDate && (
-          <View className="px-3 py-1 rounded-full bg-[#1f2937]">
-            <Text className="text-xs text-gray-300">
-              Vence em {formatDate(account.dueDate)}
-            </Text>
-          </View>
-        )}
+        {/* Vencimento */}
+        {account.dueDate &&
+          (() => {
+            const isOverdue =
+              account.status === "pendente" &&
+              new Date(account.dueDate) < new Date();
 
-        {account.important && (
-          <View className="px-3 py-1 rounded-full bg-[#3B0D0D]">
-            <Text className="text-xs font-bold text-red-500">
-              ⚠ Importante
-            </Text>
-          </View>
-        )}
+            return (
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  isOverdue ? "bg-red" : "bg-[#1f2937]"
+                }`}
+              >
+                <Text
+                  className={`text-xs font-bold text-white
+                  `}
+                >
+                  {isOverdue
+                    ? `Vencida em ${formatDate(account.dueDate)}`
+                    : `Vence em ${formatDate(account.dueDate)}`}
+                </Text>
+              </View>
+            );
+          })()}
+
+        {/* Importante */}
+        {/* {account.important && (
+    <View className="px-3 py-1 rounded-full bg-[#3B0D0D]">
+      <Text className="text-xs font-bold text-red-500">
+        ⚠ Importante
+      </Text>
+    </View>
+  )} */}
       </View>
 
       {/* Extras */}
-      {account.description && (
-        <Text className="mt-1 text-gray-300">📝 {account.description}</Text>
-      )}
-      {account.personId && (
-        <Text className="text-gray-300">👤 Pessoa: {account.personId}</Text>
-      )}
-      {account.categoryId && (
-        <Text className="text-gray-300">
-          📂 Categoria: {account.categoryId}
-        </Text>
-      )}
+
+      {/* <View className="flex-row items-center gap-2">
+        {account.personId && (
+          <Text className="text-gray-300">👤 Ricardo ACF</Text>
+          // <Text className="text-gray-300">👤 {account.personId}</Text>
+        )}
+        {account.categoryId && (
+          <Text className="text-gray-300">📂 Carro</Text>
+          // <Text className="text-gray-300">
+          //   📂 Categoria: {account.categoryId}
+          // </Text>
+        )}
+      </View> */}
     </View>
   );
 }

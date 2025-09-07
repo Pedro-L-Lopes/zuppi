@@ -1,16 +1,25 @@
-import { AntDesign } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useState } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import { FlatList, Text, View } from "react-native";
 import AccountItem from "../components/AccountItem";
+import AccountsSummary from "../components/AccountsSummary";
+import MonthFilter from "../components/MonthFilter";
+import StatusFilter from "../components/StatusFilter";
 import { deleteAccount } from "../db/actions/accountsActions";
 import { useAccounts } from "../db/hooks/useAccounts";
 
-export default function HomeScreen({ navigation }: any) {
+export default function HomeScreen({ navigation, route }: any) {
   const { accounts, refreshAccounts } = useAccounts();
+
+  const initialType = route?.params?.type ?? "receita";
   const [filterType, setFilterType] = useState<"all" | "receita" | "despesa">(
-    "all"
+    initialType
   );
+
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "pago" | "pendente" | "vencido"
+  >("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("2025-09");
 
   useFocusEffect(
     React.useCallback(() => {
@@ -23,28 +32,43 @@ export default function HomeScreen({ navigation }: any) {
     refreshAccounts();
   };
 
+  // Aplica todos os filtros
   const filteredAccounts = accounts.filter((acc) => {
-    if (filterType === "all") return true;
-    return acc.type === filterType;
+    // tipo
+    if (filterType !== "all" && acc.type !== filterType) return false;
+
+    // mês/ano
+    if (selectedMonth && acc.dueDate) {
+      const d = new Date(acc.dueDate);
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (ym !== selectedMonth) return false;
+    }
+
+    // status
+    if (filterStatus !== "all") {
+      if (filterStatus === "vencido") {
+        return (
+          acc.status === "pendente" &&
+          acc.dueDate &&
+          new Date(acc.dueDate) < new Date()
+        );
+      }
+      return acc.status === filterStatus;
+    }
+
+    return true;
   });
 
   return (
-    <View className="flex-1 bg-[#0A0E14] p-4">
-      {/* Botão adicionar conta */}
-      <Pressable
-        onPress={() => navigation.navigate("Add")}
-        className="bg-gradient-to-r from-[#1DA1F2] to-[#00D26A] flex-row items-center justify-center py-3 px-5 rounded-2xl mb-5 shadow-md"
-      >
-        <AntDesign name="pluscircleo" size={20} color="white" />
-        <Text className="text-white font-semibold ml-2">Adicionar Conta</Text>
-      </Pressable>
+    <View className="flex-1 bg-primary1 p-4">
+      <AccountsSummary accounts={filteredAccounts} />
 
-      {/* Botões de filtro */}
-      <View className="flex-row justify-between mb-4">
+      {/* Filtro de tipo */}
+      {/* <View className="flex-row justify-between mb-2">
         {[
-          { type: "all", label: "Todas", color: "#9CA3AF" },
-          { type: "receita", label: "Receitas", color: "#00D26A" },
-          { type: "despesa", label: "Despesas", color: "#1DA1F2" },
+          { type: "all", label: "Todas" },
+          { type: "receita", label: "Receitas" },
+          { type: "despesa", label: "Despesas" },
         ].map((btn) => (
           <Pressable
             key={btn.type}
@@ -57,18 +81,25 @@ export default function HomeScreen({ navigation }: any) {
           >
             <Text
               className={`text-center font-semibold ${
-                filterType === btn.type
-                  ? `text-[${btn.color}]`
-                  : "text-gray-400"
+                filterType === btn.type ? `text-white` : "text-gray-400"
               }`}
             >
               {btn.label}
             </Text>
           </Pressable>
         ))}
-      </View>
+      </View> */}
 
-      {/* Lista de contas */}
+      <StatusFilter
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+      />
+
+      <MonthFilter
+        selectedMonth={selectedMonth}
+        setSelectedMonth={setSelectedMonth}
+      />
+
       <FlatList
         data={filteredAccounts}
         keyExtractor={(item) => item.id}
@@ -77,7 +108,7 @@ export default function HomeScreen({ navigation }: any) {
         )}
         ListEmptyComponent={
           <Text className="text-center mt-6 text-gray-500">
-            Nenhuma conta cadastrada.
+            Nenhuma conta encontrada.
           </Text>
         }
         contentContainerStyle={{ paddingBottom: 100 }}
