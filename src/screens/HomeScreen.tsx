@@ -60,7 +60,7 @@ export default function HomeScreen({ navigation, route }: any) {
   });
 
   return (
-    <View className="flex-1 bg-primary1 p-4">
+    <View className="flex-1 bg-primary1 p-4 pt-10">
       <AccountsSummary accounts={filteredAccounts} />
 
       {/* Filtro de tipo */}

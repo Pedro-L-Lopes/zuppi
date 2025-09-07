@@ -13,7 +13,7 @@ export const deleteAccount = async (id: string) => {
 
 export const updateAccountStatus = async (
   id: string,
-  status: "pending" | "paid"
+  status: "pendente" | "pago"
 ) => {
   const account = store.getRow("accounts", id);
   if (account) {

@@ -31,7 +31,10 @@ export default function RootLayout() {
         barStyle="light-content"
       />
 
-      <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <SafeAreaView
+        style={styles.container}
+        edges={["left", "right", "bottom"]}
+      >
         <AppNavigator />
       </SafeAreaView>
     </>
